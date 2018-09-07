@@ -1,0 +1,795 @@
+// ConsoleApplication4.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+
+#include <string>
+#include <iostream>
+#include <vector>
+#include <memory>
+#include <algorithm> 
+#include <functional> 
+#include <unordered_map>
+#include <map>
+
+
+class Builder
+{
+public:
+	void setOne(const std::string& d)
+	{
+		one = d;
+	}
+	void setTwo(const std::string& s)
+	{
+		two = s;
+	}
+	void print() const
+	{
+		std::cout << one << ", " << two << std::endl;
+	}
+private:
+	std::string one;
+	std::string two;
+};
+
+class BuilderBuilder
+{
+public:
+	virtual ~BuilderBuilder() {};
+
+	Builder* getBuilder()
+	{
+		return builder.release();
+	}
+	void createNewProduct()
+	{
+		builder = std::make_unique<Builder>();
+	}
+	virtual void buildOne() = 0;
+	virtual void buildTwo() = 0;
+protected:
+	std::unique_ptr<Builder> builder;
+};
+
+class OneBuilderBuilder : public BuilderBuilder
+{
+public:
+	virtual ~OneBuilderBuilder() {};
+
+	virtual void buildOne()
+	{
+		builder->setOne("mere");
+	}
+	virtual void buildTwo()
+	{
+		builder->setTwo("pere");
+	}
+};
+
+class TwoBuilderBuilder : public BuilderBuilder
+{
+public:
+	virtual ~TwoBuilderBuilder() {};
+
+	virtual void buildOne()
+	{
+		builder->setOne("ciocolata");
+	}
+	virtual void buildTwo()
+	{
+		builder->setTwo("vanilie");
+	}
+};
+
+class Do
+{
+public:
+	void print()
+	{
+		builderBuilder->getBuilder()->print();
+	}
+	void makeBuilder(BuilderBuilder* pb)
+	{
+		builderBuilder = pb;
+		builderBuilder->createNewProduct();
+		builderBuilder->buildOne();
+		builderBuilder->buildTwo();
+	}
+private:
+	BuilderBuilder* builderBuilder;
+};
+
+
+class Big
+{
+public:
+	virtual void Run() = 0;
+	virtual void Stop() = 0;
+
+	virtual ~Big() {};
+};
+class One : public Big
+{
+public:
+	void Run() override
+	{ 
+		std::cout << "One run \n";
+	};
+	void Stop() override 
+	{ 
+		std::cout << "One stop \n";
+	};
+	virtual ~One() {};
+};
+class Two : public Big
+{
+public:
+	void Run() override
+	{
+		std::cout << "Two run \n";
+	};
+	void Stop() override
+	{
+		std::cout << "Two stop \n";
+	};
+	virtual ~Two() {};
+};
+
+class Factory
+{
+public:
+	static Big *NewBig(const std::string &description)
+	{
+		if (description == "one")
+			return new One;
+		if (description == "two")
+			return new Two;
+		return nullptr;
+	}
+};
+
+class Adapt
+{
+public:
+	virtual void print() = 0;
+};
+
+class Adaptee
+{
+public:
+	Adaptee() {
+		std::cout << "Adaptee \n";
+	}
+	void oldPrint() {
+		std::cout << "oldPrint \n";
+	}
+};
+
+class Adapter : public Adapt, private Adaptee
+{
+public:
+	Adapter() :
+		Adaptee() 
+	{
+		std::cout << "Adapter \n";
+	}
+
+	void print() {
+		std::cout << "print \n";
+		oldPrint();
+	}
+};
+
+
+
+class Composite {
+public:
+	virtual void print() const = 0;
+	virtual void remove(Composite *g) {}
+	virtual void add(Composite *g) {}
+	virtual void getChild(int) {}
+	virtual ~Composite() {}
+};
+
+class OneC : public Composite {
+public:
+	void print() const {
+		std::cout << "One\n";
+	}
+};
+
+class TwoC : public Composite {
+public:
+	void print() const {
+		std::cout << "Two \n";
+	}
+};
+
+class ThreeC : public Composite {
+public:
+	void print() const {
+		std::cout << "Three \n";
+	}
+};
+
+class AllC : public Composite {
+public:
+	void print() const {
+		std::for_each(list.begin(), list.end(), std::mem_fun(&Composite::print));
+	}
+
+	void add(Composite *a) {
+		list.push_back(a);
+	}
+
+private:
+	std::vector<Composite*> list;
+};
+
+
+
+class Implementor {
+public:
+	virtual void print(int) = 0;
+	virtual ~Implementor() {}
+};
+
+class ImplementorA : public Implementor {
+public:
+	ImplementorA() {}
+	virtual ~ImplementorA() {}
+	void print(int side) {
+		std::cout << "One " << side << std::endl;
+	}
+};
+
+class ImplementorB : public Implementor {
+public:
+	ImplementorB() {}
+	virtual ~ImplementorB() {}
+	void print(int side) {
+		std::cout << "Two " << side << std::endl;
+	}
+};
+
+class Abstract {
+public:
+	virtual void printa() = 0;
+	virtual void resize(int pct) = 0;
+	virtual ~Abstract() {}
+};
+
+class Refined : public Abstract {
+public:
+	Refined(int s, Implementor& Implementor) :
+		side(s), implementor(Implementor) {}
+	virtual ~Refined() {}
+	void printa() {
+		implementor.print(side);
+	}
+	void resize(int pct) {
+		side *= pct;
+	}
+private:
+	int side;
+	Implementor& implementor;
+};
+
+
+
+class SubOne
+{
+public:
+	void MethodOne() 
+	{ 
+		std::cout << "SubSystem 1\n"; 
+	};
+};
+
+class SubTwo
+{
+public:
+	void MethodTwo() 
+	{ 
+		std::cout << "SubSystem 2\n"; 
+	};
+};
+
+class SubThree
+{
+public:
+	void MethodThree() 
+	{
+		std::cout << "SubSystem 3\n"; 
+	}
+};
+
+class Facade
+{
+public:
+	Facade()
+	{
+		pOne = new SubOne();
+		pTwo = new SubTwo();
+		pThree = new SubThree();
+	}
+	void MethodA()
+	{
+		std::cout << "Facade::MethodA\n";
+		pOne->MethodOne();
+		pTwo->MethodTwo();
+	}
+	void MethodB()
+	{
+		std::cout << "Facade::MethodB\n";
+		pTwo->MethodTwo();
+		pThree->MethodThree();
+	}
+private:
+	SubOne * pOne;
+	SubTwo *pTwo;
+	SubThree *pThree;
+};
+
+
+
+class Subj
+{
+public:
+	virtual void request() = 0;
+	virtual ~Subj() {}
+};
+
+class RealSubj : public Subj
+{
+public:
+	void request()
+	{
+		std::cout << "RealSubj\n";
+	}
+};
+
+class Proxy : public Subj
+{
+private:
+	Subj * realsubj;
+public:
+	Proxy() : realsubj(new RealSubj()) {}
+	~Proxy() 
+	{
+		delete realsubj;
+	}
+	void request()
+	{
+		realsubj->request();
+	}
+};
+
+
+
+class Record
+{
+public:
+	virtual ~Record() {}
+	virtual void print() = 0;
+	virtual std::unique_ptr<Record> clone() = 0;
+};
+
+class ARecord : public Record
+{
+private:
+	std::string name;
+public:
+	ARecord(std::string n) : name(n){}
+	void print() override
+	{
+		std::cout << "Record A " << name << std::endl;
+	}
+	std::unique_ptr<Record> clone() override
+	{
+		return std::make_unique<ARecord>(*this);
+	}
+};
+
+class BRecord : public Record
+{
+private:
+	std::string name;
+public:
+	BRecord(std::string n) : name(n){}
+	void print() override
+	{
+		std::cout << "Record B " << name << std::endl;
+	}
+	std::unique_ptr<Record> clone() override
+	{
+		return std::make_unique<BRecord>(*this);
+	}
+};
+
+class CRecord : public Record
+{
+private:
+	std::string name;
+public:
+	CRecord(std::string n) : name(n){}
+	void print() override
+	{
+		std::cout << "Record C " << name << std::endl;
+	}
+	std::unique_ptr<Record> clone() override
+	{
+		return std::make_unique<CRecord>(*this);
+	}
+};
+
+enum RecordType
+{
+	A,
+	B,
+	C
+};
+
+class RecordFactory
+{
+private:
+	std::unordered_map<RecordType, std::unique_ptr<Record>, std::hash<int> > records;
+
+public:
+	RecordFactory()
+	{
+		records[A] = std::make_unique<ARecord>("mere");
+		records[B] = std::make_unique<BRecord>("pere");
+		records[C] = std::make_unique<CRecord>("capsuni");
+	}
+	std::unique_ptr<Record> createRecord(RecordType recordType)
+	{
+		return records[recordType]->clone();
+	}
+};
+
+
+
+class Memento
+{
+private:
+	friend class Originator;
+	Memento(int s) : state(s) {}
+	void setState(int s)
+	{
+		state = s;
+	}
+	int getState()
+	{
+		return state;
+	}
+	int state;
+};
+
+class Originator
+{
+public:
+	void setState(int s)
+	{
+		std::cout << "Set state to " << s << std::endl;
+		state = s;
+	}
+	int getState()
+	{
+		return state;
+	}
+	void setMemento(Memento *m)
+	{
+		state = m->getState();
+	}
+	Memento *createMemento() 
+	{
+		return new Memento(state);
+	}
+private:
+	int state;
+};
+
+class Care
+{
+public:
+	Care(Originator *o) : originator(o) {}
+	~Care() 
+	{
+		for (unsigned int i = 0; i < history.size(); i++) 
+		{
+			delete history.at(i);
+		}
+		history.clear();
+	}
+	void save()
+	{
+		std::cout << "Save state" << std::endl;;
+		history.push_back(originator->createMemento());
+	}
+	void undo()
+	{
+		std::cout << "Undo state" << std::endl;;
+		originator->setMemento(history.back());
+		history.pop_back();
+	}
+private:
+	Originator * originator;
+	std::vector<Memento *> history;
+};
+
+
+
+class Component
+{
+public:
+	virtual void dostuff() = 0;
+};
+
+class ConcreteComponent : public Component
+{
+public:
+	void dostuff() {
+		std::cout << "do stuff " << std::endl;
+	}
+};
+
+class Decorator : public Component
+{
+public:
+	Decorator(Component *c) : component(c) {}
+	virtual void dostuff()
+	{
+		component->dostuff();
+	}
+private:
+	Component* component;
+};
+
+class DecoratorA : public Decorator
+{
+public:
+	DecoratorA(Component *c) : Decorator(c) {}
+	void operation() {
+		Decorator::dostuff();
+		std::cout << "A\n";
+	}
+};
+
+class DecoratorB : public Decorator
+{
+public:
+	DecoratorB(Component *c) : Decorator(c) {}
+	void dostuff()
+	{
+		Decorator::dostuff();
+		std::cout << "B\n";
+	}
+};
+
+
+
+class Flyweight 
+{
+public:
+	virtual ~Flyweight() { }
+	virtual void operation() = 0;
+};
+
+class AFlyweight : public Flyweight
+{
+public:
+	AFlyweight(int i) : state(i) {}
+	void operation()
+	{
+		std::cout << "flyweight B " << state << std::endl;
+	}
+private:
+	int state;
+};
+
+class FlyweightFactory {
+public:
+	virtual ~FlyweightFactory()
+	{
+		for (auto i : flies)
+		{
+			delete i.second;
+		}
+		flies.clear();
+	}
+	Flyweight *getFlyweight(int i) {
+		if (flies.find(i) != flies.end()) {
+			return flies[i];
+		}
+		Flyweight *fly = new AFlyweight(i);
+		flies.insert(std::pair<int, Flyweight*>(i, fly));
+		return fly;
+	}
+private:
+	std::map<int, Flyweight*> flies;
+};
+
+
+
+class Iterator;
+class Aggregate
+{
+public:
+	virtual Iterator *createIterator() = 0;
+};
+
+class ConcreteAggregate : public Aggregate
+{
+public:
+	ConcreteAggregate(const unsigned int i)
+	{
+		list = new int[i];
+		for(int a = 0; a < i; a ++)
+			list[a] = a + 1;
+		count = i;
+	}
+	Iterator *createIterator();
+	~ConcreteAggregate()
+	{
+		delete[] list;
+	}
+	unsigned int size() const
+	{
+		return count;
+	}
+	int at(unsigned int i)
+	{
+		return list[i];
+	}
+private:
+	int *list;
+	unsigned int count;
+};
+
+class Iterator {
+public:
+	virtual ~Iterator() {}
+	virtual void first() = 0;
+	virtual void next() = 0;
+	virtual bool isDone() const = 0;
+	virtual int currentItem() const = 0;
+};
+
+class ConcreteIterator : public Iterator {
+public:
+	ConcreteIterator(ConcreteAggregate *l) : list(l), i(0) {}
+	void first()
+	{
+		i = 0;
+	}
+	void next()
+	{
+		i++;
+	}
+	bool isDone() const
+	{
+		return (i >= list->size());
+	}
+	int currentItem() const
+	{
+		if (isDone())
+		{
+			return -1;
+		}
+		return list->at(i);
+	}
+private:
+	ConcreteAggregate * list;
+	unsigned int i;
+};
+
+Iterator *ConcreteAggregate::createIterator()
+{
+	return new ConcreteIterator(this);
+}
+
+
+
+
+int main()
+{
+	Do doo;
+	OneBuilderBuilder oneBuilder;
+	TwoBuilderBuilder twoBuilder;
+	doo.makeBuilder(&oneBuilder);
+	doo.print();
+	doo.makeBuilder(&twoBuilder);
+	doo.print();
+
+	std::cout << "\n";
+	Factory ff;
+	ff.NewBig("one")->Run();
+	ff.NewBig("one")->Stop();
+	ff.NewBig("two")->Run();
+	ff.NewBig("two")->Stop();
+
+	std::cout << "\n";
+	Adapt *a = new Adapter();
+	a->print();
+
+	std::cout << "\n";
+	OneC onec;
+	onec.print();
+	TwoC twoc;
+	twoc.print();
+	ThreeC threec;
+	threec.print();
+	AllC allc;
+	allc.add(&onec);
+	allc.add(&twoc);
+	allc.add(&threec);
+	allc.print();
+
+	std::cout << "\n";
+	ImplementorA implementorA;
+	ImplementorB implementorB;
+	Refined aa(1, implementorA);
+	Refined bb(2, implementorB);
+	Abstract* vect[2];
+	vect[0] = &aa;
+	vect[1] = &bb;
+	vect[0]->resize(10);
+	vect[0]->printa();
+	vect[1]->resize(10);
+	vect[1]->printa();
+
+	std::cout << "\n";
+	Facade *facade = new Facade();
+	facade->MethodA();
+	facade->MethodB();
+
+	std::cout << "\n";
+	Proxy p;
+	p.request();
+
+	std::cout << "\n";
+	RecordFactory recfac;
+	auto rec = recfac.createRecord(A);
+	rec->print();
+	rec = recfac.createRecord(B);
+	rec->print();
+	rec = recfac.createRecord(C);
+	rec->print();
+
+	std::cout << "\n";
+	Originator *originator = new Originator;
+	Care *caretaker = new Care(originator);
+	originator->setState(1);
+	caretaker->save();
+	originator->setState(2);
+	caretaker->save();
+	originator->setState(3);
+	caretaker->undo();
+	std::cout << "State " << originator->getState() << std::endl;
+	delete originator;
+	delete caretaker;
+
+	std::cout << "\n";
+	Component *component = new DecoratorA(new DecoratorB(new ConcreteComponent));
+	component->dostuff();
+	
+	std::cout << "\n";
+	FlyweightFactory *factory = new FlyweightFactory;
+	factory->getFlyweight(1)->operation();
+	factory->getFlyweight(2)->operation();
+	
+	std::cout << "\n";
+	ConcreteAggregate list = ConcreteAggregate(5);
+	Iterator *it = list.createIterator();
+	for (it; !it->isDone(); it->next()) 
+	{
+		std::cout << it->currentItem() << std::endl;
+	}
+	delete it;
+	 
+
+	return 0;
+}
+
