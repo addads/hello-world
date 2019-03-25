@@ -33,13 +33,13 @@ class SecondListener : public Listener
 class SuperObserver
 {
 public:
-   void attach(Listener *listener)
+   void attach(std::shared_ptr<Listener> listener)
    {
       mListeners.push_back(listener);
       std::cout << "AtTaChEd" << std::endl;
    }
 
-   void detach(Listener *listener)
+   void detach(std::shared_ptr<Listener> listener)
    {
       for (auto &lis : mListeners)
       {
@@ -62,7 +62,7 @@ public:
 
 private:
 
-   std::vector<Listener*> mListeners;
+   std::vector<std::shared_ptr<Listener> > mListeners;
 };
 
 int main()
@@ -70,8 +70,8 @@ int main()
     std::cout << "Hello World!\n";
 
     SuperObserver observer;
-    auto first = new FirstListener;
-    auto second = new SecondListener;
+    auto first = std::shared_ptr<Listener>(new FirstListener);
+    auto second = std::shared_ptr<Listener>(new SecondListener);
 
     observer.attach(first);
     observer.attach(second);
