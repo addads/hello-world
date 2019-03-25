@@ -21,7 +21,7 @@ class Composite : public Base
 public:
    Composite(int data) : Base(data) {}
 
-   void add(Base* obj)
+   void add(std::shared_ptr<Base> obj)
    {
       mObj.push_back(obj);
    }
@@ -38,7 +38,7 @@ public:
    }
 
 private:
-   std::vector<Base*> mObj;
+   std::vector<std::shared_ptr<Base> > mObj;
 };
 
 class Leaf : public Base
@@ -56,24 +56,23 @@ int main()
 {
     std::cout << "Hello World!\n";
 
-    auto root = new Composite(0);
+    auto root = std::make_shared<Composite>(0);
 
-    auto container1 = new Composite(7);
-    container1->add(new Leaf(10));
-    container1->add(new Leaf(12));
+    auto container1 = std::make_shared<Composite>(7);
+    container1->add(std::make_shared<Leaf>(10));
+    container1->add(std::make_shared<Leaf>(12));
     root->add(container1);
 
-    auto container2 = new Composite(20);
-    container2->add(new Leaf(21));
+    auto container2 = std::make_shared<Composite>(20);
+    container2->add(std::make_shared<Leaf>(21));
     root->add(container2);
 
-    root->add(new Leaf(31));
-    root->add(new Leaf(32));
-    root->add(new Leaf(33));
+    root->add(std::make_shared<Leaf>(31));
+    root->add(std::make_shared<Leaf>(32));
+    root->add(std::make_shared<Leaf>(33));
 
     root->display();
 
     return 0;
 
 }
-
