@@ -1,0 +1,77 @@
+﻿<Page x:Class="AddaDS.AddaDSHome"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:WpfApp1"
+      mc:Ignorable="d" 
+      d:DesignHeight="350" d:DesignWidth="500"
+      Title="AddaDS - Home">
+
+    <Grid Margin="10,0,10,10">
+        <Grid.Resources>
+            <!-- Name item template -->
+            <DataTemplate x:Key="nameItemTemplate">
+                <Label Content="{Binding XPath=@Name}"/>
+            </DataTemplate>
+            <!-- Expense Report Data -->
+            <XmlDataProvider x:Key="ExpenseDataSource" XPath="Expenses">
+                <x:XData>
+                    <Expenses xmlns="">
+                        <Person Name="Hello" Department="You">
+                            <Expense ExpenseType="Hi" ExpenseAmount="2" />
+                            <Expense ExpenseType="Hello" ExpenseAmount="5" />
+                        </Person>
+                        <Person Name="Bye" Department="Still you">
+                            <Expense ExpenseType="Go away"
+      ExpenseAmount="7"/>
+                            <Expense ExpenseType="Stay away" ExpenseAmount="9" />
+                        </Person>
+                        <Person Name="Nananana" Department="Batman">
+                            <Expense ExpenseType="Happy" 
+     ExpenseAmount="5"/>
+                            <Expense ExpenseType="Dark" ExpenseAmount="4" />
+                            <Expense ExpenseType="Good" ExpenseAmount="4" />
+                        </Person>
+                        <Person Name="Why" Department="Me">
+                            <Expense ExpenseType="No" ExpenseAmount="2" />
+                        </Person>
+                    </Expenses>
+                </x:XData>
+            </XmlDataProvider>
+        </Grid.Resources>
+        <Grid.Background>
+            <ImageBrush ImageSource="C:\Users\ACalota\source\repos\WpfApp1\Afternoon-Delight-Unicorn-Rainbow-Sex.jpg"/>
+        </Grid.Background>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="230" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Label Grid.Column="0" Style="{StaticResource headerTextStyle}" >
+           Hello :(
+        </Label>
+        <!-- People list -->
+        <ProgressBar Width="300" Height="25" Minimum="0" Maximum="30" x:Name="ProgressBar"></ProgressBar>
+        <Border Grid.Column="1" Grid.Row="1" Style="{StaticResource listHeaderStyle}">
+            <Label Style="{StaticResource listHeaderTextStyle}">That's cute</Label>
+        </Border>
+        <ListBox Name="peopleListBox" Grid.Column="1" Grid.Row="2" 
+         ItemsSource="{Binding Source={StaticResource ExpenseDataSource}, XPath=Person}"
+         ItemTemplate="{StaticResource nameItemTemplate}">
+        </ListBox>
+
+
+
+        <!-- View report button -->
+        <Button Grid.Column="1" Grid.Row="3" Click="Button_Click" Style="{StaticResource buttonStyle}">S.O.S.</Button>
+        
+    </Grid>
+</Page>
